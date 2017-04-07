@@ -87,18 +87,18 @@ class Compile2Html {
 	}
 
 	[handleOldOptions] (options) {
+		let optionsText = '';
 		try {
 			options = JSON.parse(options);
-            let optionsText = '';
             options.forEach((v, i) => {
                 let {option, detail} = v;
                 let text = option.toString() + '. ' + detail.toString();
                 optionsText += `<p>${text}</p>`;
             });
-            this.options = optionsText;
 		} catch(e) {
 
 		}
+		this.options = optionsText;
 	}
 
 	get html() {
