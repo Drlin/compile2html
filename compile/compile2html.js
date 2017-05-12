@@ -4,10 +4,20 @@ const handleAnswers = Symbol('handleAnswers');
 const handleOptions = Symbol('handleOptions');
 const replaceData = Symbol('replaceData');
 const handleOldOptions = Symbol('handleOldOptions');
+const style = document.createElement('style');
+style.type = 'text/css';
+const head = document.head || document.querySelector('head');
+const textNode 
+	= 
+	document.createTextNode('.lin-options {margin-bottom: 10px;} .lin-options * {display: inline-block;} .lin-options script {display: none;}');
+style.appendChild(textNode);
+head.appendChild(style);
+
 const ANSTYPE = {
 	1: '<span>（   ）</span>',
 	2: '<span>___</span>',
 	3: '',
+	4: '',
 	7: '<span>（   ）</span>',
 };
 
@@ -63,17 +73,21 @@ class Compile2Html {
 	      i ++;
 	    }
 
-		this.stem_html_part += `<p>${this[replaceData](question.content)}</p>`;
+		this.stem_html_part += `<p> ${this[replaceData](question.content)}</p>`;
 		this[handleAnswers](question.answers);
 		this[handleOptions](question.options);
 	}
 
 	[handleAnswers] (answers) {
+		let _answers = '';
 		Object.keys(answers).map((item) => {
+			let answer = '';
 			answers[item].answer_result.map((v) => {
-				this.answer += `<p>${this[replaceData](v)}</p>`;
+				answer += `${this[replaceData](v)}`;
 			})
-		})	
+			_answers += `<span>${answer}</span>&nbsp;&nbsp;`;
+		})
+		this.answer += `<p>${_answers}</p>`
 	}
 
 	[handleOptions] (options) {
@@ -90,10 +104,16 @@ class Compile2Html {
 		let optionsText = '';
 		try {
 			options = JSON.parse(options);
+			options.sort((a, b) => {
+				if(a.option.toString().toLowerCase() > b.option.toString().toLowerCase()) {
+				 	return 1;
+				}
+			    return -1;
+			});
             options.forEach((v, i) => {
                 let {option, detail} = v;
                 let text = option.toString() + '. ' + detail.toString();
-                optionsText += `<p>${text}</p>`;
+                optionsText += `<div class="lin-options">${text}</div>`;
             });
 		} catch(e) {
 
@@ -104,7 +124,11 @@ class Compile2Html {
 	get html() {
 		let {stem_html_part, options, answer, oldQuestion, obj, hint} = this;
 		let stem_html = stem_html_part + options;
+		let question_type = obj.question_type;
 		if (oldQuestion) {
+			if (question_type !== 0 && question_type !== 6) {
+				stem_html = obj.stem_html
+			}
 			return {...obj, ...{options, stem_html}};
 		}
     	return {...obj, ...{stem_html_part, options, answer, hint, stem_html}};

@@ -1,6 +1,6 @@
 {
   "name": "compile2html",
-  "version": "1.10.0",
+  "version": "1.10.15",
   "description": "",
   "main": "./build/bundle.js",
   "scripts": {
