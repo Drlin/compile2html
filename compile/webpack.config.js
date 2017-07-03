@@ -15,12 +15,16 @@ module.exports = {
 		loaders: [{
 			test: /\.js$/,
 			exclude: path.resolve(__dirname, 'node_modules'),
-			include: path.resolve(__dirname, 'compile2html.js'),
+			include: path.resolve(__dirname, './'),
 			loader: 'babel-loader',
 			query: {
                 presets: ['es2015', 'stage-0']
             }
-		}]
+		},{
+            test: /\.css$/,
+            use: [ 'style-loader', 'css-loader' ]
+        }
+		]
 	},
 	plugins: ([
 		new webpack.optimize.UglifyJsPlugin({

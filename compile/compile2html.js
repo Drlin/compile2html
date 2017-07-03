@@ -4,14 +4,8 @@ const handleAnswers = Symbol('handleAnswers');
 const handleOptions = Symbol('handleOptions');
 const replaceData = Symbol('replaceData');
 const handleOldOptions = Symbol('handleOldOptions');
-const style = document.createElement('style');
-style.type = 'text/css';
-const head = document.head || document.querySelector('head');
-const textNode 
-	= 
-	document.createTextNode('.lin-options {margin-bottom: 10px;} .lin-options * {display: inline-block;} .lin-options script {display: none;}');
-style.appendChild(textNode);
-head.appendChild(style);
+import './index.css';
+import {ToFullUpper, unicodeNum} from './utils.js';
 
 const ANSTYPE = {
 	1: '<span>（   ）</span>',
@@ -34,60 +28,64 @@ class Compile2Html {
 			this.oldQuestion = true
 			this.stem_html_part = stem_html_part;
 			this[handleOldOptions](options);
+			this.algorithm = false
 			return;
+		};
+		if (questions[0].questions.length > 0) {
+			this.algorithm = questions[0].questions[0].order === undefined ? false : true
+		} else {
+			this.algorithm = false
 		}
-		this.count = 0;
 		this.answer = '';
 		this.stem_html_part = '';
 		this.options = '';
-		this.hint = questions[0].hint ? `<p>${questions[0].hint}</p>` : ''
-		this[single](questions);
+		this.hint = questions[0].hint ? `<div>${questions[0].hint}</div>` : ''
+		this[single](questions, 0);
 	}
 
 	[replaceData] (value) {
-		try {
-			value = value.replace(/\n/g, '<br>');
-			value = value.replace(/\s(?!src=")/g, '&nbsp');
-		} catch(e) {
-
-		}
-		return value;
+		// try {
+		// 	// value = value.replace(/\n/g, '<br>');
+		// 	// value = value.replace(/\s(?!src=")/g, '&nbsp');
+		// } catch(e) {}
+		// return value;
+		return `<span class="pre-lin">${value}</span>`
 	}
-
-	[single] (questions) {
+	[single] (questions, count) {
+		let numberKey = count + 1;
 		questions.map((item) => {
-			this[handleQuestion](item);
+			this[handleQuestion](item, count, item.order);
 			if (item.questions.length > 0) {
-				this[single](item.questions);
-				this.count++;
+				this[single](item.questions, numberKey);
 			}
 		})
 	}
 
-	[handleQuestion] (question) {
-		let answer = question.answers, arr = Object.keys(answer), i = 0;
+	[handleQuestion] (question, count, j) {
+		let content_num = count === 0 ? '' : count === 1 ? `(${j + 1})` : `${unicodeNum[j]}`;
+		let answer = question.answers, option = question.options, arr = Object.keys(answer), i = 0;
 		const reg = new RegExp('<answer id="[^"]*"><\/answer>');
 	    while(i < arr.length) {
 	      let type = answer[arr[i]]['answer_type'];
 	      question.content = question.content.replace(reg, ANSTYPE[type])
 	      i ++;
 	    }
-
-		this.stem_html_part += `<p> ${this[replaceData](question.content)}</p>`;
-		this[handleAnswers](question.answers);
-		this[handleOptions](question.options);
+		this.stem_html_part += `<p>${this.algorithm ? content_num : ''}${this[replaceData](question.content)}</p>`;
+		this[handleAnswers](answer || [], count, j);
+		this[handleOptions](option || {});
 	}
 
-	[handleAnswers] (answers) {
+	[handleAnswers] (answers, count, i) {
+		let content_num = count === 0 ? '' : count === 1 ? `(${i + 1})` : `${unicodeNum[i]}`
 		let _answers = '';
 		Object.keys(answers).map((item) => {
 			let answer = '';
 			answers[item].answer_result.map((v) => {
 				answer += `${this[replaceData](v)}`;
 			})
-			_answers += `<span>${answer}</span>&nbsp;&nbsp;`;
+			_answers += answer ? `<span>${answer}</span>&nbsp;&nbsp;` : '';
 		})
-		this.answer += `<p>${_answers}</p>`
+		this.answer += `<p>${this.algorithm? content_num : ''}${_answers}</p>`
 	}
 
 	[handleOptions] (options) {
@@ -109,7 +107,7 @@ class Compile2Html {
 				 	return 1;
 				}
 			    return -1;
-			});
+			})
             options.forEach((v, i) => {
                 let {option, detail} = v;
                 let text = option.toString() + '. ' + detail.toString();
@@ -139,3 +137,6 @@ export {
 	Compile2Html
 }
 export default Compile2Html;
+
+
+

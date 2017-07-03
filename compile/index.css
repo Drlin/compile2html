@@ -1,0 +1,12 @@
+.lin-options {
+	margin-bottom: 10px;
+} 
+.lin-options * {
+	display: inline-block;
+} 
+.pre-lin {
+	white-space: pre-line;
+}
+.lin-options script {
+	display: none;
+}
