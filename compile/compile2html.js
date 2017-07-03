@@ -135,7 +135,7 @@ class Compile2Html {
 module.exports = Compile2Html;
 export {
 	Compile2Html
-}
+};
 export default Compile2Html;
 
 
